@@ -94,6 +94,7 @@ pub fn main() !void {
             }
             if (ev.ident == fd) {
                 while (true) {
+                    // this is when raw tcp connection happens - data might not have made it yet
                     const conn = std.posix.accept(fd, null, null, 0) catch |err| switch (err) {
                         error.WouldBlock => break,
                         else => return err,
@@ -102,6 +103,7 @@ pub fn main() !void {
                     try setNonBlocking(conn);
 
                     var buf: [4096]u8 = undefined;
+                    // tcp is in chunked stream
                     const r = std.posix.read(conn, buf[0..]) catch |err| switch (err) {
                         error.WouldBlock => 0,
                         else => 0,
